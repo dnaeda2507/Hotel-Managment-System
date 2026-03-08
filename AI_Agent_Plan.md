@@ -120,31 +120,6 @@ Dynamic Pricing Agent (Main Orchestrator)
 
 This is the main agent that coordinates sub-agents:
 
-```python
-class DynamicPricingAgent:
-    async def calculate_price(self, room_id: str) -> float:
-        # 1. Gather data from all sub-agents
-        events = await self.event_agent.get_upcoming_events()
-        weather = await self.weather_agent.get_forecast()
-        occupancy = await self.occupancy_agent.get_current_rate()
-
-        # 2. Get base price from database
-        base_price = await self.room_service.get_base_price(room_id)
-
-        # 3. Calculate new price based on all factors
-        new_price = self.calculate_dynamic_price(
-            base_price,
-            events,
-            weather,
-            occupancy
-        )
-
-        # 4. Save recommendation and notify manager
-        await self.pricing_service.update_price(room_id, new_price)
-
-        return new_price
-```
-
 ### 4.2 Sub-Agents
 
 | Agent                | Responsibility                         | Data Source                           |
@@ -205,8 +180,4 @@ The Multi-Agent System will transform hotel operations by:
 
 This AI agent system will be implemented in future homework assignments.
 
----
 
-**Document Version:** 1.0  
-**Date:** January 2025  
-**Course:** Website Development & AI Agent Planning
