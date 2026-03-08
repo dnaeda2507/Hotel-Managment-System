@@ -1,0 +1,17 @@
+
+services:
+  db:
+    image: postgres:16
+    container_name: hotel_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hotel_db
+    ports:
+      - "5500:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data   # volume tanımı
+
+volumes:
+  postgres_data:    

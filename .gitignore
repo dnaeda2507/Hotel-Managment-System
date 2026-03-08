@@ -1,0 +1,49 @@
+# Byte-compiled / distribution
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+Backend/venv/
+
+# dotenv
+.env
+.env.*
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+.pytest_cache/
+coverage.xml
+
+# VS Code
+.vscode/
+
+# IDE files
+.idea/
+
+# Docker
+*.log
+docker-compose.override.yml
+
+# Node
+Frontend/node_modules/
+Frontend/dist/
+
+# Build
+build/
+dist/
+
+# SQLite
+*.sqlite3
+
+# Python egg
+*.egg-info/
