@@ -10,6 +10,8 @@ from app.routes.housekeeping import router as housekeeping_router
 from app.routes.auth import router as auth_router
 from fastapi.middleware.cors import CORSMiddleware
 
+import os
+
 app = FastAPI()
 
 app.add_middleware(

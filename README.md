@@ -36,6 +36,50 @@ AI Hotel PMS is an AI-powered intelligent hotel management system. This system i
 
 ---
 
+## 🚀 Live Demo & Deployment
+
+### 🌐 Live URLs
+
+| Service               | URL                                           |
+| --------------------- | --------------------------------------------- |
+| **Frontend (Vercel)** | https://edadana07-6008.projects.vercel.app    |
+| **Backend (Render)**  | https://hotel-managment-system-1.onrender.com |
+
+### 🔐 Demo Credentials
+
+- **Moderator:** moderator@example.com / Dev@12345!
+- **User:** user@example.com / Dev@12345!
+
+### 🏗️ Deployment Guide (Free Tier)
+
+This project can be deployed for free using the following platforms:
+
+#### 1. Database (Supabase - Free)
+
+1. Create account at [supabase.com](https://supabase.com)
+2. Create new project and run the SQL schema
+3. Get the connection string from Settings → Database
+
+#### 2. Backend (Render - Free)
+
+1. Connect your GitHub repo to [render.com](https://render.com)
+2. Create a Web Service with:
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+3. Add Environment Variables:
+   - `DATABASE_URL`: Supabase connection string
+   - `SECRET_KEY`: Generate with `python -c "import secrets; print(secrets.token_hex(32))"`
+
+#### 3. Frontend (Vercel - Free)
+
+1. Connect your GitHub repo to [vercel.com](https://vercel.com)
+2. Add Environment Variable: `VITE_API_URL` = your Render backend URL
+3. Deploy automatically
+
+For detailed instructions, see [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md).
+
+---
+
 ## 🛠️ Technologies Used
 
 ### Frontend
@@ -199,5 +243,3 @@ The detailed planning document for AI Agent integration is available in [AI_Agen
 1. **Guest Feedback Analyzer** - Analyzes reviews, routes issues to departments
 2. **Dynamic Pricing Orchestrator** - Coordinates Event/Weather/Occupancy agents
 3. **Analytics Agent** - Automatic reporting and insights
-
-
