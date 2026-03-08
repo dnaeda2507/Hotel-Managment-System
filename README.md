@@ -230,7 +230,7 @@ When the database is initialized (by running `python app/init_db.py`), the follo
 
 ## 📄 AI Agent Planning Document
 
-The detailed planning document for AI Agent integration is available in ai_agent_documantation.
+The detailed planning document for AI Agent integration is available in [AI_Agent_Plan.md](AI_Agent_Plan.md).
 
 ### AI Agent Summary
 
