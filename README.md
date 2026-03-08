@@ -200,16 +200,4 @@ The detailed planning document for AI Agent integration is available in [AI_Agen
 2. **Dynamic Pricing Orchestrator** - Coordinates Event/Weather/Occupancy agents
 3. **Analytics Agent** - Automatic reporting and insights
 
----
 
-## 📝 License
-
-This project is developed for educational purposes.
-
----
-
-## 👤 Author
-
-[Student Name]  
-[Course Name] - Homework 2  
-[University Name] - 2025
