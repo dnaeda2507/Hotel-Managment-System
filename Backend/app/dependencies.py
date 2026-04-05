@@ -5,6 +5,8 @@ from app.database import SessionLocal
 from app.utils.security import decode_access_token
 from app.repositories.user_repository import UserRepository
 from app.models.user import RoleEnum
+from fastapi import Request
+from typing import Optional
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -41,3 +43,24 @@ def require_role(required_role: RoleEnum):
         return current_user
 
     return role_checker
+
+
+def get_current_user_optional(request: Request, db: Session = Depends(get_db)) -> Optional[object]:
+    """Return current user if Authorization header present and valid, otherwise None."""
+    auth = request.headers.get("authorization")
+    if not auth:
+        return None
+    parts = auth.split()
+    if len(parts) == 2 and parts[0].lower() == "bearer":
+        token = parts[1]
+    else:
+        token = parts[-1]
+    try:
+        payload = decode_access_token(token)
+    except Exception:
+        return None
+    if not payload or "sub" not in payload:
+        return None
+    email = payload.get("sub")
+    user = UserRepository(db).get_by_email(email)
+    return user

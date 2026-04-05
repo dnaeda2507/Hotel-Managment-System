@@ -9,3 +9,5 @@ python-dotenv
 passlib[bcrypt]
 python-jose
 openai
+crewai
+pyyaml

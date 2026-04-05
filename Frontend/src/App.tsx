@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
 import RoomsPage from './pages/RoomsPage';
 import AboutPage from './pages/AboutPage';
+import RoomDetail from './pages/RoomDetail';
 import RoomDashboard from './pages/admin/RoomDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import MaintenancePage from './pages/admin/MaintenancePage';
@@ -13,10 +14,9 @@ import PricingPage from './pages/admin/PricingPage';
 import HousekeepingPage from './pages/admin/HousekeepingPage';
 
 import AdminLayout from './components/layouts/AdminLayout';
-
-function UserDashboard() {
-  return <div style={{ color: '#111', padding: 40, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>User Dashboard — yapım aşamasında</div>;
-}
+import PricingSuggestions from './pages/admin/PricingSuggestions';
+import ReservationsPage from './pages/admin/ReservationsPage'; 
+// User dashboard removed — users remain on the page they were on after login
 
 function AppRoutes() {
   return (
@@ -25,6 +25,7 @@ function AppRoutes() {
       <Route path="/" element={<HomePage />} />
       <Route path="/home" element={<HomePage />} />
       <Route path="/rooms" element={<RoomsPage />} />
+      <Route path="/rooms/:id" element={<RoomDetail />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
@@ -37,11 +38,12 @@ function AppRoutes() {
             <AdminLayout>
               <Routes>
                 <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="bookings" element={<ReservationsPage />} />
                 <Route path="rooms" element={<RoomDashboard />} />
                 <Route path="maintenance" element={<MaintenancePage />} />
                 <Route path="pricing" element={<PricingPage />} />
+                  <Route path="pricing-suggestions" element={<PricingSuggestions />} />
                 <Route path="housekeeping" element={<HousekeepingPage />} />
-                <Route path="bookings" element={<div style={{ color: '#111' }}>Rezervasyonlar (Yakında)</div>} />
                 <Route path="lost-found" element={<div style={{ color: '#111' }}>Kayıp Eşyalar (Yakında)</div>} />
                 <Route path="guests" element={<div style={{ color: '#111' }}>Misafir Listesi (Yakında)</div>} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />
@@ -52,15 +54,7 @@ function AppRoutes() {
       />
 
 
-      {/* 3. GUEST ROUTES */}
-      <Route
-        path="/user/dashboard"
-        element={
-          <ProtectedRoute allowedRole="user">
-            <UserDashboard />
-          </ProtectedRoute>
-        }
-      />
+      {/* Guest dashboard removed; regular users are not redirected to a dashboard */}
 
       {/* 4. DEFAULT REDIRECTS */}
       <Route path="*" element={<Navigate to="/" replace />} />

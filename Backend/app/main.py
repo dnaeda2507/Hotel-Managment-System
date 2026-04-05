@@ -6,7 +6,9 @@ from app.routes.room import router as room_router
 from app.routes.pricing import router as pricing_router
 from app.routes.maintenance import router as maintenance_router
 from app.routes.housekeeping import router as housekeeping_router
-
+from app.routes.reservation import router as reservation_router
+from app.routes.reviews import router as reviews_router
+from app.routes.pricing_ai import router as pricing_ai_router
 from app.routes.auth import router as auth_router
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -28,6 +30,11 @@ app.include_router(room_router)
 app.include_router(pricing_router)
 app.include_router(maintenance_router)
 app.include_router(housekeeping_router)
+app.include_router(reservation_router)
+app.include_router(reviews_router)
+app.include_router(pricing_ai_router)
+
+app.include_router(pricing_ai_router, prefix="/agents/dynamic-pricing")
 
 
 @app.get("/")

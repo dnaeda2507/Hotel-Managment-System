@@ -1,0 +1,22 @@
+{
+  "suggestions": [
+    {
+      "room_type": "Deluxe",
+      "capacity": "2+1 kişilik",
+      "base_price": 1400.0,
+      "suggested_price": 700.0,
+      "change_percent": -50,
+      "justification": "Low occupancy (0%) + no events + bad weather forecast"
+    },
+    {
+      "room_type": "Standard",
+      "capacity": "2+1 kişilik",
+      "base_price": 525.0,
+      "suggested_price": 300.0,
+      "change_percent": -42.86,
+      "justification": "Low occupancy (0%) + no events + bad weather forecast"
+    }
+  ],
+  "overall_strategy": "The pricing strategy focuses on competitive pricing due to the low demand signals, including low occupancy and adverse weather conditions, to help increase the likelihood of filling available rooms. As no events are occurring and rain is expected, lower price points are necessary to attract guests.",
+  "demand_level": "LOW"
+}

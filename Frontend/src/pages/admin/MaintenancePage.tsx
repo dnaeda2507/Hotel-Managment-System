@@ -101,7 +101,7 @@ export default function MaintenancePage() {
 
   if (loading) {
     return (
-      <div style={{ padding: '24px', textAlign: 'center', paddingTop: '100px', color: '#666' }}>
+      <div style={{ padding: '100px 24px 24px 24px', textAlign: 'center', color: '#666' }}>
         Yükleniyor...
       </div>
     );

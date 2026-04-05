@@ -127,9 +127,9 @@ def get_pricing_by_type_and_capacity(room_type: str, capacity: str, db: Session 
     """Oda tipi ve kapasiteye göre fiyatlandırma getir"""
     repo = PricingRepository(db)
     service = PricingService(repo)
-    
-    pricing = service.get_price_for_room(room_type, capacity)
-    if pricing is None:
+    # Return the full RoomPricing record (ORM) so response_model=RoomPricing can serialize it
+    pricing = repo.get_price_by_room_type_and_capacity(room_type, capacity)
+    if not pricing:
         raise HTTPException(status_code=404, detail="Fiyatlandırma bulunamadı")
     return pricing
 

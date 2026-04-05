@@ -89,7 +89,7 @@ export default function PricingPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: '24px', textAlign: 'center', paddingTop: '100px' }}>
+      <div style={{ padding: '100px 24px 24px 24px', textAlign: 'center' }}>
         <div style={{ color: '#666' }}>Yükleniyor...</div>
       </div>
     );

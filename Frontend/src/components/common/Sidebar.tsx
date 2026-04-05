@@ -9,6 +9,7 @@ export default function Sidebar() {
     { name: 'Genel Bakış', path: '/admin/dashboard', icon: '📊' },
     { name: 'Oda Yönetimi', path: '/admin/rooms', icon: '🏨' },
     { name: 'Fiyatlandırma', path: '/admin/pricing', icon: '💰' },
+    { name: 'Fiyat Önerileri', path: '/admin/pricing-suggestions', icon: '🧾' },
     { name: 'Teknik Servis', path: '/admin/maintenance', icon: '🛠️' },
     { name: 'Temizlik (Housekeeping)', path: '/admin/housekeeping', icon: '🧹' },
     { name: 'Kayıp Eşyalar', path: '/admin/lost-found', icon: '🔍' },

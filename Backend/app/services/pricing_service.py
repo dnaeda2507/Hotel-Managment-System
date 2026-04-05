@@ -35,7 +35,10 @@ class PricingService:
 
     def get_price_for_room(self, room_type: str, capacity: str):
         """Oda tipi ve kapasiteye göre fiyat getir"""
-        return self.pricing_repo.get_price_by_room_type_and_capacity(room_type, capacity)
+        pricing = self.pricing_repo.get_price_by_room_type_and_capacity(room_type, capacity)
+        if pricing:
+            return pricing.price_per_night
+        return None
 
     def create_pricing(self, pricing_data: dict):
         """Yeni fiyatlandırma oluştur"""

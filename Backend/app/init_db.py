@@ -7,7 +7,9 @@ from app.models.user import User
 from app.models.maintenance import MaintenanceTicket  # EKLE
 from app.models.housekeeping import HousekeepingTask  # EKLE
 from app.models.pricing import RoomPricing            # EKLE
+from app.models.reservation import Reservation
 from app.models.room_feature import RoomFeature          # EKLE
+from app.models.review import Review
 
 def init_db():
     # 1. Tabloları oluştur

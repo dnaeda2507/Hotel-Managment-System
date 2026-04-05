@@ -13,8 +13,8 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (data: LoginRequest) => Promise<void>;
-  register: (data: RegisterRequest) => Promise<void>;
+  login: (data: LoginRequest, redirectTo?: string | null) => Promise<void>;
+  register: (data: RegisterRequest, redirectTo?: string | null) => Promise<void>;
   logout: () => void;
 }
 
@@ -43,20 +43,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     (role: string) => {
       if (role === 'moderator') {
         navigate('/admin/dashboard', { replace: true });
-      } else {
-        navigate('/user/dashboard', { replace: true });
       }
+      // Regular users: do not forcefully redirect; remain on current page
     },
     [navigate]
   );
 
   const login = useCallback(
-    async (data: LoginRequest) => {
+    async (data: LoginRequest, redirectTo?: string | null) => {
       try {
         const res = await authApi.login(data);
         localStorage.setItem('token', res.access_token);
         setUser(res.user);
-        redirectByRole(res.user.role);
+        if (redirectTo) {
+          navigate(redirectTo, { replace: true });
+        } else {
+          redirectByRole(res.user.role);
+        }
       } catch (error: any) {
         // Handle timeout or network errors
         if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
@@ -68,18 +71,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
     },
-    [redirectByRole]
+    [redirectByRole, navigate]
   );
 
   const register = useCallback(
-    async (data: RegisterRequest) => {
+    async (data: RegisterRequest, redirectTo?: string | null) => {
       try {
         // Register → direkt login yap
         await authApi.register(data);
         const res = await authApi.login(data);
         localStorage.setItem('token', res.access_token);
         setUser(res.user);
-        redirectByRole(res.user.role);
+        if (redirectTo) {
+          navigate(redirectTo, { replace: true });
+        } else {
+          redirectByRole(res.user.role);
+        }
       } catch (error: any) {
         // Handle timeout or network errors
         if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
@@ -91,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
     },
-    [redirectByRole]
+    [redirectByRole, navigate]
   );
 
   const logout = useCallback(() => {

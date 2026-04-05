@@ -7,6 +7,10 @@ from app.models.user import RoleEnum
 from app.repositories.room_repository import RoomRepository
 from app.repositories.pricing_repository import PricingRepository
 from app.services.room_service import RoomService
+from app.repositories.reservation_repository import ReservationRepository
+from app.dependencies import get_db
+from sqlalchemy.orm import Session
+from datetime import date as _date
 from app.services.pricing_service import PricingService
 from app.schemas.room import RoomCreate, Room as RoomSchema
 
@@ -28,9 +32,51 @@ def get_rooms(service: RoomService = Depends(get_room_service)):
 
 
 @router.get("/available", response_model=List[RoomSchema])
-def get_available_rooms(service: RoomService = Depends(get_room_service)):
-    """Boş ve temiz odaları getir"""
-    return service.check_availability()
+def get_available_rooms(
+    service: RoomService = Depends(get_room_service),
+    db: Session = Depends(get_db),
+    check_in_date: _date | None = None,
+    check_out_date: _date | None = None,
+):
+    """Boş ve temiz odaları getir. Opsiyonel `check_in_date` ve `check_out_date` verildiğinde
+    tarih aralığına göre müsaitlik kontrolü yapılır (rezerveli odalar filtrelenir).
+    """
+    rooms = service.check_availability()
+
+    # Eğer tarih aralığı verilmemişse, sadece is_occupied/is_clean filtresi uygulandıktan sonra dön
+    if not check_in_date or not check_out_date:
+        return rooms
+
+    # Eğer tarihleri string olarak geldiyse parse et (FastAPI genelde date tipinde verir)
+    try:
+        if isinstance(check_in_date, str):
+            from datetime import date as _dt
+            check_in_date = _dt.fromisoformat(check_in_date)
+        if isinstance(check_out_date, str):
+            from datetime import date as _dt
+            check_out_date = _dt.fromisoformat(check_out_date)
+    except Exception:
+        # Hatalı format verildiyse, FastAPI zaten 422 döner; burası ekstra güvenlik
+        return rooms
+
+    reservation_repo = ReservationRepository(db)
+
+    available_rooms = []
+    for r in rooms:
+        is_free = reservation_repo.check_room_availability(r.id, check_in_date, check_out_date)
+        if is_free:
+            available_rooms.append(r)
+
+    return available_rooms
+
+
+@router.get("/{room_id}", response_model=RoomSchema)
+def get_room(room_id: int, service: RoomService = Depends(get_room_service)):
+    """Tek bir oda getir"""
+    room = service.get_room(room_id)
+    if not room:
+        raise HTTPException(status_code=404, detail="Oda bulunamadı")
+    return room
 
 
 @router.post("/", response_model=RoomSchema)

@@ -26,7 +26,8 @@ class RoomService:
                 status_code=400,
                 detail=f"{room_type} tipi ve {capacity} kapasitesi için fiyat tanımlanmamış."
             )
-        room_data["price_per_night"] = pricing.price_per_night
+        # pricing is a numeric price_per_night (float)
+        room_data["price_per_night"] = pricing
 
         feature_entry = self.room_repo.get_features_by_type(room_type)
         room_data["features"] = feature_entry.features if feature_entry else "Standart Oda Özellikleri"
@@ -34,17 +35,38 @@ class RoomService:
         return self.room_repo.create_room(room_data)
 
     def list_rooms(self):
-        return self.room_repo.get_all_rooms()
+        rooms = self.room_repo.get_all_rooms()
+        if self.pricing_service:
+            for r in rooms:
+                try:
+                    # get_price_for_room returns numeric price
+                    r.price_per_night = self.pricing_service.get_price_for_room(r.room_type, r.capacity)
+                except Exception:
+                    pass
+        return rooms
 
     def get_room(self, room_id: int):
-        return self.room_repo.get_room_by_id(room_id)
+        room = self.room_repo.get_room_by_id(room_id)
+        if room and self.pricing_service:
+            try:
+                room.price_per_night = self.pricing_service.get_price_for_room(room.room_type, room.capacity)
+            except Exception:
+                pass
+        return room
 
     def update_room(self, room_id: int, update_data: dict):
         return self.room_repo.update_room(room_id, update_data)
 
     def check_availability(self):
         rooms = self.room_repo.get_all_rooms()
-        return [r for r in rooms if not r.is_occupied and r.is_clean]
+        available = [r for r in rooms if not r.is_occupied and r.is_clean]
+        if self.pricing_service:
+            for r in available:
+                try:
+                    r.price_per_night = self.pricing_service.get_price_for_room(r.room_type, r.capacity)
+                except Exception:
+                    pass
+        return available
 
     def check_out(self, room_id: int):
         return self.room_repo.check_out(room_id)

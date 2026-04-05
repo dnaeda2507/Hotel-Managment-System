@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export default function RegisterPage() {
   const { register } = useAuth();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -18,7 +19,9 @@ export default function RegisterPage() {
     if (password !== confirm) { setError('Passwords do not match'); return; }
     setLoading(true);
     try {
-      await register({ email, password });
+      const state: any = (location as any).state;
+      const redirectTo = state?.from || undefined;
+      await register({ email, password }, redirectTo);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Registration failed');
     } finally {

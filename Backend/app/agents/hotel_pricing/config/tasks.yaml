@@ -1,0 +1,65 @@
+analyze_occupancy:
+  description: >
+    Use the OccupancyTool to fetch occupancy data for the period starting from {start_date} to {end_date}.
+    Calculate the occupancy rate (reserved rooms / total rooms).
+    Also determine whether the dates fall on a weekend (Friday or Saturday nights).
+    Return a structured summary including:
+    - occupancy_rate (0.0 to 1.0)
+    - total_rooms
+    - reserved_rooms
+    - is_weekend (true/false)
+    - date_range
+  expected_output: >
+    A structured text summary with occupancy_rate, total_rooms, reserved_rooms,
+    is_weekend flag, and a one-sentence interpretation
+    (e.g. "High occupancy at 82% suggests strong demand — prices should increase.")
+  agent: occupancy_analyst
+
+research_market:
+  description: >
+    Search for upcoming events in Antalya for {date_range} via DuckDuckGo and check weather.
+    Also retrieve the weather forecast for Antalya during {date_range} using the WeatherTool.
+    Summarize all demand signals:
+    - List any events found (festivals, concerts, sports, conferences, public holidays)
+    - Summarize weather conditions (temperature, rain)
+    - Give an overall demand signal: LOW / MEDIUM / HIGH / VERY HIGH
+  expected_output: >
+    A structured summary with:
+    1. Events list (name, date, expected impact)
+    2. Weather summary (avg temperature, rain expected yes/no)
+    3. Overall demand signal with reasoning
+  agent: market_researcher
+
+suggest_prices:
+  description: >
+    You have received occupancy analysis and market research from your colleagues.
+    Using this context, suggest new prices for each room type and capacity combination.
+    Base prices to adjust from: {base_prices}
+    Rules:
+    - Never go below 50% of base price
+    - Never exceed 200% of base price
+    - High occupancy + events + good weather = increase significantly
+    - Low occupancy + no events + bad weather = decrease moderately
+    - Weekend always adds a small premium (5-10%)
+    Return ONLY valid JSON in this exact format:
+    {
+      "suggestions": [
+        {
+          "room_type": "Standard",
+          "capacity": "2 kişilik",
+          "base_price": 2000,
+          "suggested_price": 2400,
+          "change_percent": 20,
+          "justification": "High occupancy (82%) + Antalya Marathon event"
+        }
+      ],
+      "overall_strategy": "A comprehensive summary of why these prices were chosen based on demand signals."
+      "demand_level":"HIGH/MEDIUM/LOW"
+    }
+  expected_output: >
+    Valid JSON with suggestions array, overall_strategy string, and demand_level.
+  agent: pricing_strategist
+  context:
+    - analyze_occupancy
+    - research_market
+  output_file: output/price_suggestions.json
