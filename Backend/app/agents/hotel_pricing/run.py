@@ -26,7 +26,7 @@ def run_pricing_crew(start_date: str, end_date: str, db_session) -> dict:
         "base_prices": json.dumps(base_prices, ensure_ascii=False),
     }
 
-    # Crew'u başlat
+   
     crew = HotelPricingCrew()
     crew.set_db_session(db_session)
     result = crew.crew().kickoff(inputs=inputs)

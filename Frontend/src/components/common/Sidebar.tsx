@@ -12,6 +12,7 @@ export default function Sidebar() {
     { name: 'Fiyat Önerileri', path: '/admin/pricing-suggestions', icon: '🧾' },
     { name: 'Teknik Servis', path: '/admin/maintenance', icon: '🛠️' },
     { name: 'Temizlik (Housekeeping)', path: '/admin/housekeeping', icon: '🧹' },
+    { name: 'Yorum Analizi (AI)', path: '/admin/review-analysis', icon: '🤖' },
     { name: 'Kayıp Eşyalar', path: '/admin/lost-found', icon: '🔍' },
     { name: 'Rezervasyonlar', path: '/admin/bookings', icon: '📅' },
     { name: 'Misafir Listesi', path: '/admin/guests', icon: '👥' },

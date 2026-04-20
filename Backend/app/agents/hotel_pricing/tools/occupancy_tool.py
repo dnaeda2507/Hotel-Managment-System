@@ -58,7 +58,16 @@ class OccupancyTool(BaseTool):
                     reserved += 1
 
             rate = reserved / total
-            is_weekend = start.weekday() in (4, 5)  # Friday=4, Saturday=5
+            # Determine whether any date in the requested range falls on a weekend (Sat/Sun)
+            try:
+                from datetime import timedelta
+                days = (end - start).days
+                if days < 0:
+                    days = 0
+                is_weekend = any(((start + timedelta(days=i)).weekday() in (5, 6)) for i in range(days + 1))
+            except Exception:
+                # Fallback in case of unexpected date arithmetic issues
+                is_weekend = start.weekday() in (5, 6)
 
             # Interpret occupancy
             if rate >= 0.85:

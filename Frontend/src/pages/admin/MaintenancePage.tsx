@@ -146,6 +146,7 @@ export default function MaintenancePage() {
             <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '1px solid #e0e0e0' }}>
               <th style={{ padding: '16px', textAlign: 'left', color: '#666' }}>Oda</th>
               <th style={{ padding: '16px', textAlign: 'left', color: '#666' }}>Başlık</th>
+              <th style={{ padding: '16px', textAlign: 'left', color: '#666' }}>Açıklama</th>
               <th style={{ padding: '16px', textAlign: 'left', color: '#666' }}>Öncelik</th>
               <th style={{ padding: '16px', textAlign: 'left', color: '#666' }}>Durum</th>
               <th style={{ padding: '16px', textAlign: 'center', color: '#666' }}>İşlemler</th>
@@ -158,6 +159,7 @@ export default function MaintenancePage() {
                   {rooms.find(r => r.id === ticket.room_id)?.room_number ?? `#${ticket.room_id}`}
                 </td>
                 <td style={{ padding: '16px', color: '#333' }}>{ticket.title}</td>
+                <td style={{ padding: '16px', color: '#555', maxWidth: '250px' }}>{ticket.description}</td>
                 <td style={{ padding: '16px' }}>
                   <span style={{
                     padding: '4px 12px', borderRadius: '20px', fontSize: '12px',

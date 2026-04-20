@@ -1,4 +1,6 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import ReviewAnalysisPage from './pages/admin/ReviewAnalysisPage';
 import { AuthProvider } from './hooks/useAuth';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
@@ -42,8 +44,9 @@ function AppRoutes() {
                 <Route path="rooms" element={<RoomDashboard />} />
                 <Route path="maintenance" element={<MaintenancePage />} />
                 <Route path="pricing" element={<PricingPage />} />
-                  <Route path="pricing-suggestions" element={<PricingSuggestions />} />
+                <Route path="pricing-suggestions" element={<PricingSuggestions />} />
                 <Route path="housekeeping" element={<HousekeepingPage />} />
+                <Route path="review-analysis" element={<ReviewAnalysisPage />} />
                 <Route path="lost-found" element={<div style={{ color: '#111' }}>Kayıp Eşyalar (Yakında)</div>} />
                 <Route path="guests" element={<div style={{ color: '#111' }}>Misafir Listesi (Yakında)</div>} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />

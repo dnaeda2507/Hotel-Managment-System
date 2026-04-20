@@ -11,3 +11,7 @@ python-jose
 openai
 crewai
 pyyaml
+langgraph
+langchain
+langchain-openai
+langsmith

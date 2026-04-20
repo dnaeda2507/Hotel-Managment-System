@@ -1,22 +1,29 @@
+```json
 {
   "suggestions": [
     {
-      "room_type": "Deluxe",
-      "capacity": "2+1 kişilik",
-      "base_price": 1400.0,
-      "suggested_price": 700.0,
+      "room_type": "Standard 2+1 kişilik",
+      "base_price": 5000.0,
+      "suggested_price": 2500.0,
       "change_percent": -50,
-      "justification": "Low occupancy (0%) + no events + bad weather forecast"
+      "justification": "Low occupancy (25%) combined with no events and a not-so-attractive rainy forecast on the last day necessitates a competitive pricing strategy."
     },
     {
-      "room_type": "Standard",
-      "capacity": "2+1 kişilik",
-      "base_price": 525.0,
-      "suggested_price": 300.0,
-      "change_percent": -42.86,
-      "justification": "Low occupancy (0%) + no events + bad weather forecast"
+      "room_type": "Deluxe 2+1 kişilik",
+      "base_price": 6000.0,
+      "suggested_price": 3000.0,
+      "change_percent": -50,
+      "justification": "Given the low occupancy and absence of events, the price has been adjusted down to attract guests."
+    },
+    {
+      "room_type": "Deluxe 2 kişilik",
+      "base_price": 3000.0,
+      "suggested_price": 1500.0,
+      "change_percent": -50,
+      "justification": "This room type is also adjusted significantly to fill rooms, in light of low demand and weather conditions."
     }
   ],
-  "overall_strategy": "The pricing strategy focuses on competitive pricing due to the low demand signals, including low occupancy and adverse weather conditions, to help increase the likelihood of filling available rooms. As no events are occurring and rain is expected, lower price points are necessary to attract guests.",
+  "overall_strategy": "The prices have been significantly reduced to stimulate demand due to low occupancy rates (25%) and no scheduled events during the stay. Although pleasant weather is forecasted, the potential rain on the last day may discourage guests. Thus, adopting a more competitive pricing strategy is essential to maximize occupancy.",
   "demand_level": "LOW"
 }
+```

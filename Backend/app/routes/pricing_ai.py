@@ -27,13 +27,9 @@ class PriceSuggestionItem(BaseModel):
     base_price: float
     suggested_price: float
     change_percent: float
-    # Make justification optional and allow empty string so missing AI text won't break validation
     justification: Optional[str] = ""
-    # Backwards-compatible field: some frontends expect `reason`
     reason: Optional[str] = ""
-    # Frontend legacy: some UI expects `reasons` (plural)
     reasons: Optional[str] = ""
-    # Multiplier for suggested/base shown in UI
     multiplier: Optional[float] = 0.0
 
 class SuggestResponse(BaseModel):

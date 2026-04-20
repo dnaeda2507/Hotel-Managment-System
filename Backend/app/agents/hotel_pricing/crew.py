@@ -47,7 +47,7 @@ class HotelPricingCrew():
         return Agent(
             config=cfg,
             verbose=True,
-            # No tools — reasons from context provided by the other two agents
+            
             allow_delegation=False
         )
 
