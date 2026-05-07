@@ -3,6 +3,7 @@ export interface Issue {
   type: string;
   desc: string;
   date?: string;
+  auto_assigned?: boolean;
 }
 
 export interface Task {
@@ -16,4 +17,5 @@ export interface Task {
 export interface ReportResponse {
   report: string;
   detected_issues: Issue[];
+  generated_tasks?: Task[];
 }

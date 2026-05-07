@@ -15,3 +15,5 @@ langgraph
 langchain
 langchain-openai
 langsmith
+openai-agents[mcp]
+mcp

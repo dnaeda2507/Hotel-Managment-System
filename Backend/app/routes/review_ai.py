@@ -1,10 +1,10 @@
 
 from fastapi import APIRouter, Body, Depends, Query
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 from pydantic import BaseModel
-from app.agents.review_langgraph.langgraph_agentic_review import build_agentic_review_graph, AgenticState
+from app.agents.review_langgraph.langgraph_agentic_review import build_agentic_review_graph, AgenticState  # type: ignore[attr-defined]
 from app.agents.review_langgraph.langgraph_review_task import create_checkout_cleaning_task
 from app.dependencies import get_db
 from app.repositories.review_repository import ReviewRepository
@@ -38,20 +38,53 @@ def auto_report(
     graph = build_agentic_review_graph(db)
     state: AgenticState = {
         "messages": [{"role": "user", "content": t} for t in review_texts],
-        "detected_issues": [],
-        "generated_tasks": [],
+        "cleaning_issues": [],
+        "maintenance_issues": [],
+        "cleaning_tasks_created": [],
+        "maintenance_tasks_created": [],
         "report": None,
-        "history": [],
-        "outcome": None,
-        "tool_calls": [],
         "eval_result": None,
+        "eval_feedback": None,
         "iteration": 0,
     }
     result = graph.invoke(state)
+
+    cleaning_tasks = result.get("cleaning_tasks_created") or []
+    maintenance_tasks = result.get("maintenance_tasks_created") or []
+    cleaning_issues = result.get("cleaning_issues") or []
+    maintenance_issues = result.get("maintenance_issues") or []
+
+    # Classifier'ın tespit ettiği sorunlar — oluşturulan görevler auto_assigned
+    assigned_cleaning_rooms = {t["room_id"] for t in cleaning_tasks}
+    assigned_maintenance_rooms = {t["room_id"] for t in maintenance_tasks}
+
+    detected_issues = []
+    for issue in cleaning_issues:
+        detected_issues.append({
+            "room_id": issue.get("room_id"),
+            "type": "cleaning",
+            "desc": issue.get("description", ""),
+            "date": datetime.now(timezone.utc).isoformat(),
+            "auto_assigned": issue.get("room_id") in assigned_cleaning_rooms,
+        })
+    for issue in maintenance_issues:
+        detected_issues.append({
+            "room_id": issue.get("room_id"),
+            "type": "maintenance",
+            "desc": issue.get("description", ""),
+            "date": datetime.now(timezone.utc).isoformat(),
+            "auto_assigned": issue.get("room_id") in assigned_maintenance_rooms,
+        })
+
+    generated_tasks = [
+        {"task_type": t["type"], "room_id": t["room_id"], "desc": t["description"], "date": t["date"]}
+        for t in cleaning_tasks + maintenance_tasks
+    ]
+
     return {
         "report": result.get("report") or "Analiz tamamlandı.",
-        "detected_issues": result.get("detected_issues") or [],
-        "generated_tasks": result.get("generated_tasks") or [],
+        "detected_issues": detected_issues,
+        "generated_tasks": generated_tasks,
     }
 
 # Agentic (LLM+tools+evaluator+loop) tek akış endpointi
@@ -64,13 +97,13 @@ def agentic_analyze_reviews(
     graph = build_agentic_review_graph(db)
     state: AgenticState = {
         "messages": [{"role": "user", "content": r} for r in reviews],
-        "detected_issues": [],
-        "generated_tasks": [],
+        "cleaning_issues": [],
+        "maintenance_issues": [],
+        "cleaning_tasks_created": [],
+        "maintenance_tasks_created": [],
         "report": None,
-        "history": [],
-        "outcome": None,
-        "tool_calls": [],
         "eval_result": None,
+        "eval_feedback": None,
         "iteration": 0,
     }
     result = graph.invoke(state)
@@ -88,6 +121,14 @@ def assign_selected_tasks(
     housekeeping_svc = HousekeepingService(housekeeping_repo, room_repo)
     maintenance_svc = MaintenanceService(maintenance_repo, room_repo)
     created_tasks = []
+    # --- Detected issues state güncellemesi için ---
+    # Varsayım: detected_issues state'i bir şekilde erişilebilir olmalı (ör. DB, cache, dosya, vs.)
+    # Burada örnek olarak global bir değişken gibi simüle edelim (gerçek uygulamada uygun şekilde entegre edilmeli)
+    try:
+        from app.agents.review_langgraph.langgraph_agentic_review import _issues_buffer
+    except ImportError:
+        _issues_buffer = None
+
     for issue in issues:
         if issue.type in ("cleaning", "temizlik"):
             task = housekeeping_svc.create_task({
@@ -119,6 +160,16 @@ def assign_selected_tasks(
                 "date": str(datetime.utcnow().date()),
                 "task_id": getattr(task, "id", None),
             })
+        # --- assigned flag'ini güncelle ---
+        # Eğer _issues_buffer erişilebiliyorsa, ilgili sorunun assigned alanını True yap
+        if _issues_buffer is not None:
+            for buf_issue in _issues_buffer:
+                if (
+                    buf_issue["room_id"] == issue.room_id and
+                    buf_issue["type"] == issue.type and
+                    buf_issue["desc"] == issue.desc
+                ):
+                    buf_issue["assigned"] = True
     return {"created_tasks": created_tasks}
 
 

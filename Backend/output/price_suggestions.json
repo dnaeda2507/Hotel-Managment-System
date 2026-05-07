@@ -1,29 +1,46 @@
-```json
 {
   "suggestions": [
     {
-      "room_type": "Standard 2+1 kişilik",
-      "base_price": 5000.0,
-      "suggested_price": 2500.0,
-      "change_percent": -50,
-      "justification": "Low occupancy (25%) combined with no events and a not-so-attractive rainy forecast on the last day necessitates a competitive pricing strategy."
-    },
-    {
-      "room_type": "Deluxe 2+1 kişilik",
-      "base_price": 6000.0,
-      "suggested_price": 3000.0,
-      "change_percent": -50,
-      "justification": "Given the low occupancy and absence of events, the price has been adjusted down to attract guests."
-    },
-    {
-      "room_type": "Deluxe 2 kişilik",
+      "room_type": "Standard",
+      "capacity": "2 kişilik",
       "base_price": 3000.0,
-      "suggested_price": 1500.0,
-      "change_percent": -50,
-      "justification": "This room type is also adjusted significantly to fill rooms, in light of low demand and weather conditions."
+      "suggested_price": 3600.0,
+      "change_percent": 20,
+      "justification": "High occupancy expected due to 2. Uluslararası Alanya Motofest + weekend premium."
+    },
+    {
+      "room_type": "Standard",
+      "capacity": "2+1 kişilik",
+      "base_price": 3500.0,
+      "suggested_price": 4200.0,
+      "change_percent": 20,
+      "justification": "High occupancy expected due to 2. Uluslararası Alanya Motofest + weekend premium."
+    },
+    {
+      "room_type": "Standard",
+      "capacity": "3 kişilik",
+      "base_price": 4000.0,
+      "suggested_price": 4800.0,
+      "change_percent": 20,
+      "justification": "High occupancy expected due to 2. Uluslararası Alanya Motofest + weekend premium."
+    },
+    {
+      "room_type": "Deluxe",
+      "capacity": "2 kişilik",
+      "base_price": 4000.0,
+      "suggested_price": 4800.0,
+      "change_percent": 20,
+      "justification": "High occupancy expected due to 2. Uluslararası Alanya Motofest + weekend premium."
+    },
+    {
+      "room_type": "Deluxe",
+      "capacity": "3+1 kişilik",
+      "base_price": 7000.0,
+      "suggested_price": 8400.0,
+      "change_percent": 20,
+      "justification": "High occupancy expected due to 2. Uluslararası Alanya Motofest + weekend premium."
     }
   ],
-  "overall_strategy": "The prices have been significantly reduced to stimulate demand due to low occupancy rates (25%) and no scheduled events during the stay. Although pleasant weather is forecasted, the potential rain on the last day may discourage guests. Thus, adopting a more competitive pricing strategy is essential to maximize occupancy.",
-  "demand_level": "LOW"
+  "overall_strategy": "Considering the anticipated high occupancy from the 2. Uluslararası Alanya Motofest and the pleasant weekend weather, the suggested prices reflect a strategic increase of 20% across all room types, effectively maximizing potential revenue while remaining attractive to guests. The selected rates take into account the weekend premium, ensuring competitiveness in a busy market.",
+  "demand_level": "HIGH"
 }
-```

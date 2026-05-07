@@ -7,13 +7,14 @@ from app.repositories.room_repository import RoomRepository
 
 
 def create_cleaning_task(room_id: int, desc: str, db):
+    from app.models.housekeeping import HousekeepingStatusEnum
     housekeeping_repo = HousekeepingRepository(db)
     room_repo = RoomRepository(db)
     service = HousekeepingService(housekeeping_repo, room_repo)
     return service.create_task({
         "room_id": room_id,
-        "description": desc,
-        "status": "pending",
+        "notes": desc,
+        "status": HousekeepingStatusEnum.PENDING,
     })
 
 
@@ -21,10 +22,11 @@ def create_maintenance_task(room_id: int, desc: str, db):
     maintenance_repo = MaintenanceRepository(db)
     room_repo = RoomRepository(db)
     service = MaintenanceService(maintenance_repo, room_repo)
-    return service.create_task({
+    return service.create_ticket({
         "room_id": room_id,
+        "title": f"Oda {room_id} - Bakım",
         "description": desc,
-        "status": "pending",
+        "status": "açık",
     })
 
 

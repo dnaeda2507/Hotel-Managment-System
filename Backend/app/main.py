@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.routes.admin import router as admin_router
 from app.routes.room import router as room_router
@@ -12,7 +13,15 @@ from app.routes.checkout_ai import router as checkout_ai_router
 from app.routes.auth import router as auth_router
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    from app.init_db import init_db
+    init_db()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,11 +39,13 @@ app.include_router(maintenance_router)
 app.include_router(housekeeping_router)
 app.include_router(reservation_router)
 app.include_router(reviews_router)
-app.include_router(pricing_ai_router)
 
 app.include_router(review_ai_router, prefix="/agents/review-ai")
 app.include_router(checkout_ai_router, prefix="/agents/checkout-ai")
 app.include_router(pricing_ai_router, prefix="/agents/dynamic-pricing")
+
+from app.routes.mcp_ai import router as mcp_ai_router
+app.include_router(mcp_ai_router)
 
 
 @app.get("/")

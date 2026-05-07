@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ReviewAnalysisPage from './pages/admin/ReviewAnalysisPage';
 import { AuthProvider } from './hooks/useAuth';
@@ -17,7 +16,8 @@ import HousekeepingPage from './pages/admin/HousekeepingPage';
 
 import AdminLayout from './components/layouts/AdminLayout';
 import PricingSuggestions from './pages/admin/PricingSuggestions';
-import ReservationsPage from './pages/admin/ReservationsPage'; 
+import ReservationsPage from './pages/admin/ReservationsPage';
+import MCPDemoPage from './pages/admin/MCPDemoPage';
 // User dashboard removed — users remain on the page they were on after login
 
 function AppRoutes() {
@@ -47,6 +47,7 @@ function AppRoutes() {
                 <Route path="pricing-suggestions" element={<PricingSuggestions />} />
                 <Route path="housekeeping" element={<HousekeepingPage />} />
                 <Route path="review-analysis" element={<ReviewAnalysisPage />} />
+                <Route path="mcp-demo" element={<MCPDemoPage />} />
                 <Route path="lost-found" element={<div style={{ color: '#111' }}>Kayıp Eşyalar (Yakında)</div>} />
                 <Route path="guests" element={<div style={{ color: '#111' }}>Misafir Listesi (Yakında)</div>} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />

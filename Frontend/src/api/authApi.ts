@@ -3,7 +3,7 @@ import type { TokenResponse, LoginRequest, RegisterRequest, User } from '../type
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-  timeout: 10000, // 10 second timeout to prevent infinite loading
+  timeout: 120000, // 120s — AI agent calls can take up to ~60s
 });
 
 // Her istekte token otomatik eklenir
