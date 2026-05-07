@@ -6,7 +6,7 @@
       "base_price": 3000.0,
       "suggested_price": 3600.0,
       "change_percent": 20,
-      "justification": "High occupancy expected due to 2. Uluslararası Alanya Motofest + weekend premium."
+      "justification": "High occupancy expected (due to Uluslararası Alanya Motofest) and a weekend premium."
     },
     {
       "room_type": "Standard",
@@ -14,7 +14,7 @@
       "base_price": 3500.0,
       "suggested_price": 4200.0,
       "change_percent": 20,
-      "justification": "High occupancy expected due to 2. Uluslararası Alanya Motofest + weekend premium."
+      "justification": "High demand from the motorcycle festival and families attending the event combined with weekend rates."
     },
     {
       "room_type": "Standard",
@@ -22,7 +22,7 @@
       "base_price": 4000.0,
       "suggested_price": 4800.0,
       "change_percent": 20,
-      "justification": "High occupancy expected due to 2. Uluslararası Alanya Motofest + weekend premium."
+      "justification": "High occupancy expected from event attendees; weekend rates apply."
     },
     {
       "room_type": "Deluxe",
@@ -30,7 +30,7 @@
       "base_price": 4000.0,
       "suggested_price": 4800.0,
       "change_percent": 20,
-      "justification": "High occupancy expected due to 2. Uluslararası Alanya Motofest + weekend premium."
+      "justification": "With the increased demand due to the motorcycle festival and favorable weather conditions, luxury accommodations will attract higher pricing."
     },
     {
       "room_type": "Deluxe",
@@ -38,9 +38,9 @@
       "base_price": 7000.0,
       "suggested_price": 8400.0,
       "change_percent": 20,
-      "justification": "High occupancy expected due to 2. Uluslararası Alanya Motofest + weekend premium."
+      "justification": "High demand for larger rooms during events; weekend factors into increased pricing strategy."
     }
   ],
-  "overall_strategy": "Considering the anticipated high occupancy from the 2. Uluslararası Alanya Motofest and the pleasant weekend weather, the suggested prices reflect a strategic increase of 20% across all room types, effectively maximizing potential revenue while remaining attractive to guests. The selected rates take into account the weekend premium, ensuring competitiveness in a busy market.",
+  "overall_strategy": "Pricing was set higher due to a high demand signal stemming from the Uluslararası Alanya Motofest, which is expected to draw a significant number of guests during the weekend. All prices reflect a strategic increase while remaining within the acceptable range of 70% to 200% of the base prices. The pleasant weather conditions also support increased pricing potential.",
   "demand_level": "HIGH"
 }

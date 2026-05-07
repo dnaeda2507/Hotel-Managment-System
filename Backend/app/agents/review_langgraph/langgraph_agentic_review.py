@@ -2,6 +2,8 @@ from typing import Annotated, List, Dict, Any, Optional
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
+from langgraph.prebuilt import ToolNode
+from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 import json
 from datetime import datetime
@@ -22,7 +24,7 @@ class AgenticState(TypedDict):
 def build_agentic_review_graph(db):
 
     # ── Node 1: Classifier ─────────────────────────────────────────────────────
-    # Yorumları okur, cleaning vs maintenance olarak ayırır
+    # Tool yok — sadece sınıflandırma JSON'u üretir
     def classifier_node(state: AgenticState) -> dict:
         messages = state.get("messages", [])
         if not messages:
@@ -58,62 +60,63 @@ def build_agentic_review_graph(db):
         }
 
     # ── Node 2: Cleaning Agent ─────────────────────────────────────────────────
-    # Temizlik sorunlarını önceliklendirir ve DB'ye görev açar
+    # LLM → bind_tools → tool_call → ToolNode → LLM (ReAct döngüsü)
     def cleaning_agent_node(state: AgenticState) -> dict:
-        from app.agents.review_langgraph.langgraph_review_tools import create_cleaning_task
+        from app.agents.review_langgraph.langgraph_review_tools import create_cleaning_task as _create
         from app.repositories.housekeeping_repository import HousekeepingRepository
 
         issues = state.get("cleaning_issues", [])
         if not issues:
             return {"cleaning_tasks_created": []}
 
-        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-        system = (
-            "Sen bir temizlik uzmanısın. Verilen temizlik sorunlarını öncelik sırasına koy.\n"
-            "Her sorun için uygulamaya dönük detaylı açıklama yaz.\n"
-            'Sadece JSON döndür: [{"room_id": <int>, "description": "<detaylı açıklama>", "priority": "high|medium|low"}]'
-        )
+        created = []  # closure ile tool içinden doldurulur
 
-        result = llm.invoke([
+        @tool
+        def save_cleaning_task(room_id: int, description: str) -> str:
+            """Temizlik görevi oluştur ve DB'ye kaydet."""
+            try:
+                active = HousekeepingRepository(db).get_active_task_for_room(room_id)
+                if active:
+                    return f"Oda {room_id} için zaten aktif görev var, atlandı."
+            except Exception:
+                pass
+            _create(room_id, description, db)
+            created.append({
+                "type": "cleaning",
+                "room_id": room_id,
+                "description": description,
+                "date": datetime.now().isoformat(),
+            })
+            return f"✓ Oda {room_id}: temizlik görevi oluşturuldu."
+
+        llm_with_tools = ChatOpenAI(model="gpt-4o-mini", temperature=0).bind_tools([save_cleaning_task])
+        tool_node = ToolNode([save_cleaning_task])
+
+        system = (
+            "Sen bir temizlik uzmanısın. Verilen her temizlik sorunu için "
+            "save_cleaning_task tool'unu çağır. "
+            "Aynı odayı iki kez çağırma. Tüm sorunları işledikten sonra dur."
+        )
+        messages: List[Any] = [
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(issues, ensure_ascii=False)},
-        ])
+        ]
 
-        created = []
-        try:
-            text = result.content.strip()
-            if "```" in text:
-                text = text.split("```")[1].replace("json", "").strip()
-            tasks = json.loads(text)
-
-            for task in tasks:
-                room_id = task.get("room_id")
-                description = task.get("description", "")
-
-                try:
-                    active = HousekeepingRepository(db).get_active_task_for_room(room_id)
-                    if active:
-                        continue
-                except Exception:
-                    pass
-
-                create_cleaning_task(room_id, description, db)
-                created.append({
-                    "type": "cleaning",
-                    "room_id": room_id,
-                    "description": description,
-                    "priority": task.get("priority", "medium"),
-                    "date": datetime.now().isoformat(),
-                })
-        except Exception:
-            pass
+        # ReAct döngüsü: LLM tool çağırır → ToolNode çalıştırır → LLM devam eder
+        for _ in range(6):
+            result = llm_with_tools.invoke(messages)
+            messages.append(result)
+            if not (hasattr(result, "tool_calls") and result.tool_calls):
+                break
+            tool_results = tool_node.invoke({"messages": messages})
+            messages = tool_results["messages"]
 
         return {"cleaning_tasks_created": created}
 
     # ── Node 3: Maintenance Agent ──────────────────────────────────────────────
-    # Bakım sorunlarını önceliklendirir ve DB'ye bilet açar
+    # LLM → bind_tools → tool_call → ToolNode → LLM (ReAct döngüsü)
     def maintenance_agent_node(state: AgenticState) -> dict:
-        from app.agents.review_langgraph.langgraph_review_tools import create_maintenance_task
+        from app.agents.review_langgraph.langgraph_review_tools import create_maintenance_task as _create
         from app.repositories.maintenance_repository import MaintenanceRepository
         from app.models.maintenance import MaintenanceStatusEnum
 
@@ -121,49 +124,50 @@ def build_agentic_review_graph(db):
         if not issues:
             return {"maintenance_tasks_created": []}
 
-        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-        system = (
-            "Sen bir teknik bakım uzmanısın. Verilen bakım sorunlarını öncelik sırasına koy.\n"
-            "Her sorun için detaylı teknik açıklama yaz.\n"
-            'Sadece JSON döndür: [{"room_id": <int>, "description": "<detaylı teknik açıklama>", "priority": "high|medium|low"}]'
-        )
+        created = []  # closure ile tool içinden doldurulur
 
-        result = llm.invoke([
+        @tool
+        def save_maintenance_task(room_id: int, description: str) -> str:
+            """Bakım/teknik arıza görevi oluştur ve DB'ye kaydet."""
+            try:
+                tickets = MaintenanceRepository(db).get_tickets_by_room(room_id)
+                open_ticket = next(
+                    (t for t in tickets if t.status != MaintenanceStatusEnum.CLOSED), None
+                )
+                if open_ticket:
+                    return f"Oda {room_id} için zaten açık bilet var, atlandı."
+            except Exception:
+                pass
+            _create(room_id, description, db)
+            created.append({
+                "type": "maintenance",
+                "room_id": room_id,
+                "description": description,
+                "date": datetime.now().isoformat(),
+            })
+            return f"✓ Oda {room_id}: bakım görevi oluşturuldu."
+
+        llm_with_tools = ChatOpenAI(model="gpt-4o-mini", temperature=0).bind_tools([save_maintenance_task])
+        tool_node = ToolNode([save_maintenance_task])
+
+        system = (
+            "Sen bir teknik bakım uzmanısın. Verilen her bakım sorunu için "
+            "save_maintenance_task tool'unu çağır. "
+            "Aynı odayı iki kez çağırma. Tüm sorunları işledikten sonra dur."
+        )
+        messages: List[Any] = [
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(issues, ensure_ascii=False)},
-        ])
+        ]
 
-        created = []
-        try:
-            text = result.content.strip()
-            if "```" in text:
-                text = text.split("```")[1].replace("json", "").strip()
-            tasks = json.loads(text)
-
-            for task in tasks:
-                room_id = task.get("room_id")
-                description = task.get("description", "")
-
-                try:
-                    tickets = MaintenanceRepository(db).get_tickets_by_room(room_id)
-                    open_ticket = next(
-                        (t for t in tickets if t.status != MaintenanceStatusEnum.CLOSED), None
-                    )
-                    if open_ticket:
-                        continue
-                except Exception:
-                    pass
-
-                create_maintenance_task(room_id, description, db)
-                created.append({
-                    "type": "maintenance",
-                    "room_id": room_id,
-                    "description": description,
-                    "priority": task.get("priority", "medium"),
-                    "date": datetime.now().isoformat(),
-                })
-        except Exception:
-            pass
+        # ReAct döngüsü: LLM tool çağırır → ToolNode çalıştırır → LLM devam eder
+        for _ in range(6):
+            result = llm_with_tools.invoke(messages)
+            messages.append(result)
+            if not (hasattr(result, "tool_calls") and result.tool_calls):
+                break
+            tool_results = tool_node.invoke({"messages": messages})
+            messages = tool_results["messages"]
 
         return {"maintenance_tasks_created": created}
 
@@ -205,7 +209,7 @@ def build_agentic_review_graph(db):
         }
 
     # ── Node 5: LLM Evaluator ──────────────────────────────────────────────────
-    # Raporu gerçek LLM ile değerlendirir (if/else değil)
+    # if/else değil, gerçek LLM değerlendirmesi
     def evaluator_node(state: AgenticState) -> dict:
         if state.get("iteration", 0) >= 3:
             return {"eval_result": "success", "eval_feedback": ""}
