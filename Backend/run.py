@@ -1,10 +1,14 @@
 """
 Backend Başlatıcı
 ==================
-MCP server'ı SSE/HTTP modunda başlatır, ardından uvicorn'u çalıştırır.
+İki MCP server'ı SSE modunda başlatır, ardından uvicorn'u çalıştırır.
 Windows uyumlu: asyncio subprocess YOK, subprocess.Popen kullanılır.
 
-Kullanım (her platformda):
+  MCP Review Server → port 8001 (hotel_mcp_server.py)
+  MCP Ops Server    → port 8002 (hotel_ops_server.py)
+  FastAPI           → port 8000 (app.main:app)
+
+Kullanım:
     python run.py
 """
 
@@ -18,29 +22,44 @@ from pathlib import Path
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
-_SERVER_DIR = Path(__file__).parent
-_MCP_SERVER = _SERVER_DIR / "hotel_mcp_server.py"
+_DIR = Path(__file__).parent
+_MCP_DIR = _DIR / "app" / "agents" / "mcp"
 
-# MCP server'ı SSE modunda başlat (subprocess.Popen — Windows güvenli)
-print(f"[run.py] MCP server başlatılıyor: {_MCP_SERVER}")
-mcp_proc = subprocess.Popen(
-    [sys.executable, str(_MCP_SERVER)],
-    cwd=str(_SERVER_DIR),
-)
-time.sleep(2)  # Server'ın dinlemeye başlaması için bekle
+_SERVERS = [
+    (_MCP_DIR / "hotel_mcp_server.py", "8001", "Review"),
+    (_MCP_DIR / "hotel_ops_server.py", "8002", "Ops"),
+]
 
-if mcp_proc.poll() is not None:
-    print("[run.py] HATA: MCP server başlatılamadı, çıkılıyor.")
-    sys.exit(1)
+procs = []
 
-print(f"[run.py] MCP server PID={mcp_proc.pid} çalışıyor (port 8001)")
+for server_path, port, label in _SERVERS:
+    print(f"[run.py] MCP {label} server başlatılıyor (port {port}): {server_path.name}")
+    proc = subprocess.Popen(
+        [sys.executable, str(server_path)],
+        cwd=str(_DIR),
+    )
+    procs.append((proc, label, port))
+
+time.sleep(2)
+
+for proc, label, port in procs:
+    if proc.poll() is not None:
+        print(f"[run.py] HATA: MCP {label} server başlatılamadı, çıkılıyor.")
+        for p, _, _ in procs:
+            p.terminate()
+        sys.exit(1)
+    print(f"[run.py] MCP {label} server PID={proc.pid} çalışıyor (port {port})")
 
 import uvicorn
 
+
 def _shutdown(signum, frame):
     print("\n[run.py] Kapatılıyor...")
-    mcp_proc.terminate()
+    for proc, label, port in procs:
+        proc.terminate()
+        print(f"[run.py] MCP {label} server durduruldu (port {port})")
     sys.exit(0)
+
 
 signal.signal(signal.SIGINT, _shutdown)
 if sys.platform != "win32":
@@ -54,6 +73,7 @@ try:
         reload=False,
     )
 finally:
-    mcp_proc.terminate()
-    mcp_proc.wait()
-    print("[run.py] MCP server durduruldu.")
+    for proc, label, port in procs:
+        proc.terminate()
+        proc.wait()
+        print(f"[run.py] MCP {label} server durduruldu (port {port})")

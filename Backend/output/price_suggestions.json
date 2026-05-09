@@ -4,43 +4,43 @@
       "room_type": "Standard",
       "capacity": "2 kişilik",
       "base_price": 3000.0,
-      "suggested_price": 3600.0,
-      "change_percent": 20,
-      "justification": "High occupancy expected (due to Uluslararası Alanya Motofest) and a weekend premium."
+      "suggested_price": 2100.0,
+      "change_percent": -30,
+      "justification": "Low occupancy (0%) and no significant events require competitive pricing to attract guests."
     },
     {
       "room_type": "Standard",
       "capacity": "2+1 kişilik",
       "base_price": 3500.0,
-      "suggested_price": 4200.0,
-      "change_percent": 20,
-      "justification": "High demand from the motorcycle festival and families attending the event combined with weekend rates."
+      "suggested_price": 2450.0,
+      "change_percent": -30,
+      "justification": "With 0% occupancy and no events, moderate price reduction to fill rooms is essential."
     },
     {
       "room_type": "Standard",
       "capacity": "3 kişilik",
       "base_price": 4000.0,
-      "suggested_price": 4800.0,
-      "change_percent": 20,
-      "justification": "High occupancy expected from event attendees; weekend rates apply."
+      "suggested_price": 2800.0,
+      "change_percent": -30,
+      "justification": "Low occupancy signals the need for a price drop to stimulate interest."
     },
     {
       "room_type": "Deluxe",
       "capacity": "2 kişilik",
       "base_price": 4000.0,
-      "suggested_price": 4800.0,
-      "change_percent": 20,
-      "justification": "With the increased demand due to the motorcycle festival and favorable weather conditions, luxury accommodations will attract higher pricing."
+      "suggested_price": 2800.0,
+      "change_percent": -30,
+      "justification": "No events and low occupancy necessitate lower pricing to attract guests."
     },
     {
       "room_type": "Deluxe",
       "capacity": "3+1 kişilik",
       "base_price": 7000.0,
-      "suggested_price": 8400.0,
-      "change_percent": 20,
-      "justification": "High demand for larger rooms during events; weekend factors into increased pricing strategy."
+      "suggested_price": 4900.0,
+      "change_percent": -30,
+      "justification": "Significant price reduction needed due to weak demand and no notable events."
     }
   ],
-  "overall_strategy": "Pricing was set higher due to a high demand signal stemming from the Uluslararası Alanya Motofest, which is expected to draw a significant number of guests during the weekend. All prices reflect a strategic increase while remaining within the acceptable range of 70% to 200% of the base prices. The pleasant weather conditions also support increased pricing potential.",
-  "demand_level": "HIGH"
+  "overall_strategy": "Based on the low occupancy rate and absence of events during the chosen dates, I recommend significant price reductions for all room types to stimulate demand and fill up the available inventory. The pleasant weather may attract some guests, but without events, competitive pricing is critical. The adjustments also consider that it's a weekend, where typically a slight premium could be charged, but given the overall low demand, the focus is on filling rooms.",
+  "demand_level": "LOW"
 }

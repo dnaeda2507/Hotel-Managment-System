@@ -14,61 +14,61 @@ interface ChatResponse {
   message_count: number;
 }
 
+interface Dashboard {
+  date: string;
+  total_rooms: number;
+  occupied: number;
+  available: number;
+  occupancy_pct: number;
+  checkins_today: number;
+  checkouts_today: number;
+  avg_rating: number | null;
+  pending_housekeeping: number;
+  open_maintenance: number;
+}
+
 const QUICK_ACTIONS = [
-  {
-    label: '📊 Genel Rapor',
-    msg: 'Otelin genel durumunu analiz et. Son yorumları, kategori özetini ve haftalık trendi birlikte değerlendirerek kapsamlı bir yönetici raporu sun.',
-    group: 'Genel',
-  },
-  {
-    label: '🔴 Sorunlar',
-    msg: 'Son yorumlardaki şikayetleri önceliğe göre listele. 🔴 Kritik / 🟡 Orta / 🟢 Düşük olarak sınıflandır, acil müdahale gerekenleri öne çıkar.',
-    group: 'Genel',
-  },
-  {
-    label: '📈 Haftalık Trend',
-    msg: 'Son 4 haftanın yorum sayısı ve puan trendini göster. Memnuniyet artıyor mu azalıyor mu, yorum hacmi değişti mi?',
-    group: 'Genel',
-  },
-  {
-    label: '🍽️ Yemek',
-    msg: 'Yemek ve kahvaltı ile ilgili yorumları ara. Misafirlerin yemek hakkındaki şikayetleri ve övgüleri neler?',
-    group: 'Konu',
-  },
-  {
-    label: '🧹 Temizlik',
-    msg: 'Temizlik ve hijyen ile ilgili yorumları ara. Hangi sorunlar tekrar ediyor, hangi odalar öne çıkıyor?',
-    group: 'Konu',
-  },
-  {
-    label: '❄️ Klima',
-    msg: 'Klima, ısıtma veya soğutma ile ilgili yorumları ara ve tekrar eden sorunları raporla.',
-    group: 'Konu',
-  },
-  {
-    label: '⭐ Düşük Puanlar',
-    msg: 'Son 90 günde 1 ve 2 yıldız alan yorumları getir. Ortak şikayet konularını tespit et.',
-    group: 'Filtre',
-  },
-  {
-    label: '🏨 Oda 101',
-    msg: '101 numaralı odanın tüm yorumlarını getir, ortalama puanını ve tekrar eden sorunları değerlendir.',
-    group: 'Oda',
-  },
+  // Yorum
+  { label: '📊 Genel Rapor',    group: 'Yorum',  msg: 'Otelin genel durumunu analiz et. Son yorumları, kategori özetini ve haftalık trendi birlikte değerlendirerek kapsamlı bir yönetici raporu sun.' },
+  { label: '🔴 Sorunlar',       group: 'Yorum',  msg: 'Son yorumlardaki şikayetleri önceliğe göre listele. 🔴 Kritik / 🟡 Orta / 🟢 Düşük olarak sınıflandır.' },
+  { label: '📈 Haftalık Trend', group: 'Yorum',  msg: 'Son 4 haftanın yorum sayısı ve puan trendini göster.' },
+  { label: '⭐ Düşük Puanlar', group: 'Yorum',  msg: 'Son 90 günde 1 ve 2 yıldız alan yorumları getir. Ortak şikayet konularını tespit et.' },
+  // Operasyon
+  { label: '🏨 Müsait Odalar',  group: 'Ops',    msg: 'Bugün müsait olan odaları ve fiyatlarını listele.' },
+  { label: '📅 Çıkışlar',       group: 'Ops',    msg: 'Bugün ve yarın check-out yapacak misafirleri listele.' },
+  { label: '🧹 Temizlik',       group: 'Ops',    msg: 'Temizlik bekleyen odaları listele. Hangi odalar hazır değil?' },
+  { label: '🔧 Bakım',          group: 'Ops',    msg: 'Açık teknik arıza taleplerini öncelik sırasıyla listele.' },
+  { label: '💰 Fiyat Önerisi',  group: 'Ops',    msg: '1 numaralı oda için bugünkü doluluk ve sezona göre fiyat önerisi hesapla.' },
+  { label: '📋 Günlük Özet',   group: 'Ops',    msg: 'Bugünün doluluk durumu, giriş/çıkışlar ve bekleyen operasyonel görevleri özetle.' },
 ];
 
-export default function MCPDemoPage() {
-  const [messages, setMessages]       = useState<Message[]>([]);
-  const [input, setInput]             = useState('');
-  const [loading, setLoading]         = useState(false);
-  const [sessionId, setSessionId]     = useState<string | null>(null);
-  const [msgCount, setMsgCount]       = useState(0);
-  const [error, setError]             = useState<string | null>(null);
-  const bottomRef                     = useRef<HTMLDivElement>(null);
+const GROUP_COLORS: Record<string, { bg: string; border: string; color: string; badge: string }> = {
+  Yorum: { bg: '#eff6ff', border: '#bfdbfe', color: '#1d4ed8', badge: '#dbeafe' },
+  Ops:   { bg: '#f0fdf4', border: '#bbf7d0', color: '#166534', badge: '#dcfce7' },
+};
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading]);
+export default function MCPDemoPage() {
+  const [messages, setMessages]     = useState<Message[]>([]);
+  const [input, setInput]           = useState('');
+  const [loading, setLoading]       = useState(false);
+  const [sessionId, setSessionId]   = useState<string | null>(null);
+  const [msgCount, setMsgCount]     = useState(0);
+  const [error, setError]           = useState<string | null>(null);
+  const [dashboard, setDashboard]   = useState<Dashboard | null>(null);
+  const [dashLoading, setDashLoading] = useState(true);
+  const bottomRef                   = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { loadDashboard(); }, []);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
+
+  const loadDashboard = async () => {
+    setDashLoading(true);
+    try {
+      const res = await api.get<Dashboard>('/agents/mcp/dashboard');
+      setDashboard(res.data);
+    } catch { /* sessiz geç */ }
+    setDashLoading(false);
+  };
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
@@ -92,33 +92,33 @@ export default function MCPDemoPage() {
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Bağlantı hatası';
       setError(msg);
-      setMessages(prev => prev.slice(0, -1)); // remove optimistic user message
+      setMessages(prev => prev.slice(0, -1));
     }
     setLoading(false);
   };
 
   const clearSession = async () => {
-    if (sessionId) {
-      await api.delete(`/agents/mcp/chat/session/${sessionId}`).catch(() => {});
-    }
+    if (sessionId) await api.delete(`/agents/mcp/chat/session/${sessionId}`).catch(() => {});
     setMessages([]);
     setSessionId(null);
     setMsgCount(0);
     setError(null);
   };
 
+  const groups = ['Yorum', 'Ops'];
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 40px)', maxWidth: 860, margin: '0 auto', padding: '20px 20px 0', fontFamily: 'sans-serif' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 40px)', maxWidth: 920, margin: '0 auto', padding: '20px 20px 0', fontFamily: 'sans-serif' }}>
 
       {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg,#1e40af 0%,#3b82f6 100%)', color: '#fff', borderRadius: 12, padding: '16px 22px', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ background: 'linear-gradient(135deg,#1e40af 0%,#3b82f6 100%)', color: '#fff', borderRadius: 12, padding: '16px 22px', marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: 19 }}>Yorum Analizi — AI Asistan</h2>
-          <p style={{ margin: '4px 0 0', opacity: 0.85, fontSize: 12 }}>
-            MCP · get_recent_reviews · Gerçek DB verisi
+          <h2 style={{ margin: 0, fontSize: 18 }}>Otel Yönetim Asistanı</h2>
+          <p style={{ margin: '4px 0 0', opacity: 0.85, fontSize: 11 }}>
+            MCP · Review Server (8001) · Ops Server (8002) · GPT-4o-mini
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {sessionId && (
             <span style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 6, padding: '3px 9px', fontSize: 11 }}>
               {msgCount} mesaj
@@ -127,43 +127,66 @@ export default function MCPDemoPage() {
           <button onClick={clearSession} style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 7, padding: '6px 14px', cursor: 'pointer', fontSize: 12 }}>
             Yeni Sohbet
           </button>
+          <button onClick={loadDashboard} style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', fontSize: 12 }}>
+            ↻
+          </button>
         </div>
       </div>
 
+      {/* Dashboard status bar */}
+      {!dashLoading && dashboard && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginBottom: 10 }}>
+          <StatCard label="Doluluk" value={`%${dashboard.occupancy_pct}`} sub={`${dashboard.occupied}/${dashboard.total_rooms} oda`} color="#3b82f6" />
+          <StatCard label="Bugün Giriş" value={String(dashboard.checkins_today)} sub="rezervasyon" color="#10b981" />
+          <StatCard label="Bugün Çıkış" value={String(dashboard.checkouts_today)} sub="rezervasyon" color="#f59e0b" />
+          <StatCard label="Ort. Puan" value={dashboard.avg_rating ? `${dashboard.avg_rating}/5` : '-'} sub="son 30 gün" color="#8b5cf6" />
+          <StatCard label="Bekleyen" value={String(dashboard.pending_housekeeping + dashboard.open_maintenance)} sub={`${dashboard.pending_housekeeping} temizlik · ${dashboard.open_maintenance} bakım`} color="#ef4444" />
+        </div>
+      )}
+      {dashLoading && (
+        <div style={{ background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 16px', marginBottom: 10, fontSize: 12, color: '#94a3b8' }}>
+          Dashboard yükleniyor...
+        </div>
+      )}
+
       {/* Quick actions */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-        {QUICK_ACTIONS.map(({ label, msg, group }) => {
-          const isGeneral = group === 'Genel';
-          return (
-            <button key={label} onClick={() => sendMessage(msg)} disabled={loading} style={{
-              background: isGeneral ? '#eff6ff' : '#f8fafc',
-              border: `1px solid ${isGeneral ? '#bfdbfe' : '#e2e8f0'}`,
-              borderRadius: 20,
-              padding: '5px 13px', fontSize: 12, cursor: loading ? 'not-allowed' : 'pointer',
-              color: isGeneral ? '#1d4ed8' : '#475569',
-              fontWeight: isGeneral ? 600 : 400,
-              opacity: loading ? 0.5 : 1,
-            }}>
-              {label}
-            </button>
-          );
-        })}
+      <div style={{ marginBottom: 10 }}>
+        {groups.map(group => (
+          <div key={group} style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 5, alignItems: 'center' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', minWidth: 42, textTransform: 'uppercase', letterSpacing: 1 }}>{group}</span>
+            {QUICK_ACTIONS.filter(a => a.group === group).map(({ label, msg }) => {
+              const c = GROUP_COLORS[group];
+              return (
+                <button key={label} onClick={() => sendMessage(msg)} disabled={loading} style={{
+                  background: c.bg, border: `1px solid ${c.border}`, borderRadius: 20,
+                  padding: '4px 12px', fontSize: 12, cursor: loading ? 'not-allowed' : 'pointer',
+                  color: c.color, opacity: loading ? 0.5 : 1,
+                }}>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 16 }}>
 
         {messages.length === 0 && !loading && (
-          <div style={{ textAlign: 'center', color: '#94a3b8', marginTop: 60 }}>
-            <div style={{ fontSize: 40, marginBottom: 10 }}>💬</div>
-            <p style={{ fontSize: 14 }}>Müşteri yorumları hakkında bir soru sor veya yukarıdaki hızlı aksiyonları kullan.</p>
+          <div style={{ textAlign: 'center', color: '#94a3b8', marginTop: 40 }}>
+            <div style={{ fontSize: 36, marginBottom: 8 }}>💬</div>
+            <p style={{ fontSize: 13, lineHeight: 1.6 }}>
+              Yorum analizi veya operasyonel soru sor.<br />
+              <span style={{ fontSize: 11 }}>Yorum server'ı (8001) · Ops server'ı (8002) · 12 tool + 3 resource aktif</span>
+            </p>
           </div>
         )}
 
         {messages.map((m, i) => (
           <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
             {m.role === 'assistant' && (
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, marginRight: 8, flexShrink: 0, alignSelf: 'flex-end' }}>
+              <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, marginRight: 8, flexShrink: 0, alignSelf: 'flex-end' }}>
                 🤖
               </div>
             )}
@@ -172,10 +195,7 @@ export default function MCPDemoPage() {
               background: m.role === 'user' ? '#3b82f6' : '#f8fafc',
               color:      m.role === 'user' ? '#fff'    : '#1e293b',
               borderRadius: m.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-              padding: '11px 15px',
-              fontSize: 14,
-              lineHeight: 1.7,
-              whiteSpace: 'pre-wrap',
+              padding: '10px 14px', fontSize: 13, lineHeight: 1.7, whiteSpace: 'pre-wrap',
               border: m.role === 'assistant' ? '1px solid #e5e7eb' : 'none',
               boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
             }}>
@@ -183,7 +203,7 @@ export default function MCPDemoPage() {
               <div style={{ fontSize: 10, opacity: 0.5, marginTop: 4, textAlign: 'right' }}>{m.ts}</div>
             </div>
             {m.role === 'user' && (
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, marginLeft: 8, flexShrink: 0, alignSelf: 'flex-end' }}>
+              <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, marginLeft: 8, flexShrink: 0, alignSelf: 'flex-end' }}>
                 👤
               </div>
             )}
@@ -192,7 +212,7 @@ export default function MCPDemoPage() {
 
         {loading && (
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🤖</div>
+            <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>🤖</div>
             <div style={{ background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: '18px 18px 18px 4px', padding: '12px 16px' }}>
               <TypingDots />
             </div>
@@ -209,19 +229,19 @@ export default function MCPDemoPage() {
       </div>
 
       {/* Input */}
-      <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 12, paddingBottom: 12, background: '#fff' }}>
+      <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 10, paddingBottom: 12, background: '#fff' }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage(input)}
-            placeholder="Memnuniyet raporu yaz, sorunları listele..."
+            placeholder="Yorum analizi veya otel operasyonları hakkında sor..."
             disabled={loading}
-            style={{ flex: 1, padding: '11px 16px', borderRadius: 24, border: '1.5px solid #d1d5db', fontSize: 14, outline: 'none', background: loading ? '#f8fafc' : '#fff' }}
+            style={{ flex: 1, padding: '10px 16px', borderRadius: 24, border: '1.5px solid #d1d5db', fontSize: 13, outline: 'none', background: loading ? '#f8fafc' : '#fff' }}
           />
           <button onClick={() => sendMessage(input)} disabled={loading || !input.trim()} style={{
             background: loading || !input.trim() ? '#cbd5e1' : '#3b82f6',
-            color: '#fff', border: 'none', borderRadius: '50%', width: 44, height: 44,
+            color: '#fff', border: 'none', borderRadius: '50%', width: 42, height: 42,
             cursor: loading || !input.trim() ? 'not-allowed' : 'pointer', fontSize: 18, flexShrink: 0,
           }}>
             ↑
@@ -232,22 +252,26 @@ export default function MCPDemoPage() {
   );
 }
 
+function StatCard({ label, value, sub, color }: { label: string; value: string; sub: string; color: string }) {
+  return (
+    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 14px', borderLeft: `3px solid ${color}` }}>
+      <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 2 }}>{label}</div>
+      <div style={{ fontSize: 20, fontWeight: 700, color }}>{value}</div>
+      <div style={{ fontSize: 11, color: '#64748b' }}>{sub}</div>
+    </div>
+  );
+}
+
 function TypingDots() {
   return (
     <div style={{ display: 'flex', gap: 5, alignItems: 'center', height: 16 }}>
       {[0, 1, 2].map(i => (
         <div key={i} style={{
-          width: 8, height: 8, borderRadius: '50%', background: '#94a3b8',
-          animation: 'bounce 1.2s infinite',
-          animationDelay: `${i * 0.2}s`,
+          width: 7, height: 7, borderRadius: '50%', background: '#94a3b8',
+          animation: 'bounce 1.2s infinite', animationDelay: `${i * 0.2}s`,
         }} />
       ))}
-      <style>{`
-        @keyframes bounce {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-6px); }
-        }
-      `}</style>
+      <style>{`@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }`}</style>
     </div>
   );
 }

@@ -24,7 +24,7 @@ from mcp.server.fastmcp import FastMCP
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 load_dotenv()
 
 MCP_PORT = int(os.getenv("MCP_PORT", "8001"))
@@ -285,6 +285,59 @@ def get_review_trends(weeks: int = 4) -> str:
         return "\n".join(lines)
     except Exception as e:
         return f"Hata: {e}"
+
+
+# ── Resource: Yorum Özeti ─────────────────────────────────────────────────────
+@mcp.resource("hotel://reviews/summary")
+def reviews_summary() -> str:
+    """
+    Son 30 günün yorum özetini döndür: ortalama puan, yorum sayısı, trend.
+    Agent bağlam olarak okur.
+    """
+    try:
+        with _conn() as conn:
+            stats = conn.execute(text("""
+                SELECT COUNT(*) AS total,
+                       ROUND(AVG(rating)::numeric, 1) AS avg_rating,
+                       SUM(CASE WHEN rating >= 4 THEN 1 ELSE 0 END) AS positive,
+                       SUM(CASE WHEN rating <= 2 THEN 1 ELSE 0 END) AS negative
+                FROM reviews
+                WHERE created_at > NOW() - INTERVAL '30 days'
+            """)).fetchone()
+
+            prev = conn.execute(text("""
+                SELECT ROUND(AVG(rating)::numeric, 1)
+                FROM reviews
+                WHERE created_at BETWEEN NOW() - INTERVAL '60 days'
+                                     AND NOW() - INTERVAL '30 days'
+            """)).fetchone()
+
+        total    = stats[0] or 0
+        avg_r    = stats[1]
+        positive = stats[2] or 0
+        negative = stats[3] or 0
+        prev_avg = prev[0]
+
+        trend = ""
+        if avg_r and prev_avg:
+            diff = float(avg_r) - float(prev_avg)
+            if diff > 0.1:
+                trend = f"↑ Geçen aya göre +{diff:.1f}"
+            elif diff < -0.1:
+                trend = f"↓ Geçen aya göre {diff:.1f}"
+            else:
+                trend = "→ Geçen ayla aynı seviyede"
+
+        return (
+            f"=== YORUM ÖZETİ (Son 30 Gün) ===\n"
+            f"Toplam Yorum  : {total}\n"
+            f"Ortalama Puan : {avg_r or 'Veri yok'}/5\n"
+            f"Olumlu (4-5⭐) : {positive}\n"
+            f"Olumsuz (1-2⭐): {negative}\n"
+            f"Trend         : {trend or 'Karşılaştırma için veri yok'}"
+        )
+    except Exception as e:
+        return f"Yorum özeti yüklenemedi: {e}"
 
 
 if __name__ == "__main__":
