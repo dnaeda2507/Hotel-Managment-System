@@ -57,6 +57,8 @@ Yorumlar → [Classifier] → [CleaningAgent] → [Coordinator] → [Evaluator] 
 - **CleaningAgent / MaintenanceAgent:** ReAct döngüsüyle DB'ye görev yazar (paralel)
 - **Coordinator:** Yönetici raporu üretir
 - **Evaluator:** Kalite kontrolü, düşük puanda yeniden döngü (max 3 iterasyon)
+  
+<img width="655" height="587" alt="image" src="https://github.com/user-attachments/assets/f9cb1b5b-ae1d-423e-b477-35ef3edb92e1" />
 
 ### CrewAI — Dinamik Fiyatlama
 
@@ -72,6 +74,8 @@ Yorumlar → [Classifier] → [CleaningAgent] → [Coordinator] → [Evaluator] 
 - **WeatherTool:** Open-Meteo API'dan sıcaklık verisi çeker
 - **EventSearchTool:** Brave Search API ile yerel etkinlikleri bulur
 
+<img width="581" height="315" alt="image" src="https://github.com/user-attachments/assets/484dc99a-8631-45ab-949e-01407314418a" />
+
 ### MCP — Chat Asistanı
 
 İki MCP sunucusu SSE transport ile çalışır (Windows uyumlu):
@@ -85,6 +89,8 @@ Frontend Chat → FastAPI → OpenAI Agent → MCP Server (8001 review + 8002 op
 - **Review Server (8001):** 6 yorum sorgulama tool'u
 - **Ops Server (8002):** 6 operasyon tool'u + 2 resource
 - **Hafıza:** Oturum başına max 20 mesaj
+
+<img width="824" height="587" alt="image" src="https://github.com/user-attachments/assets/f51b2cf1-696b-4ac4-b9ef-3cd88a729293" />
 
 ---
 
